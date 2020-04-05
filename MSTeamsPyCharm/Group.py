@@ -1,8 +1,15 @@
 from O365.utils import ApiComponent
 import logging
 import json
+import string
+import random
 
 log = logging.getLogger(__name__)
+
+def random_string(stringLength=20):
+    """Generate a random string of fixed length """
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
 
 
 class Group(ApiComponent):
@@ -59,7 +66,7 @@ class Group(ApiComponent):
     def create(self, display_name: str, mail_enabled: bool, 
                security_enabled: bool, owners,
                members, description=None,
-               mail_nickname=None):
+               mail_nickname=random_string(30)):
         url = self.generate_url(self._endpoints["create"])
         data = {
             "description": description,
