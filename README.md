@@ -11,7 +11,7 @@
    To install the plugin clone or download this repository, compress the folder, and proceed as instructed [here](https://docs.moodle.org/38/en/Installing_plugins)
    
 3. Integration  
-   In order for the plugin to process user requests you need to configure the Gearman server as prompted by their [documentation](http://gearman.org/getting-started/). Additionaly, you need to configure the PHP PECL extension for Gearman and the (python gearman library) [https://pypi.org/project/gearman/].
+   In order for the plugin to process user requests you need to configure the Gearman server as prompted by their [documentation](http://gearman.org/getting-started/). Additionaly, you need to configure the PHP PECL extension for Gearman and the (python gearman library)[https://pypi.org/project/gearman/].
    
 4. Visualization dashboard  
    For using the dashboard you need to install all the dependencies listed in *requirements.txt* and additionally to configure a folder comprising this open-source [dataset](https://www.kaggle.com/freecodecamp/all-posts-public-main-chatroom) and change the path in the data_wrapper.py file to match the local path of your saved dataset.
