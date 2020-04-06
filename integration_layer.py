@@ -56,7 +56,6 @@ def create_team(gearman_worker, gearman_job):
     return new_group.team_id
 
 def archive_nd_delete_team(gearman_worker, gearman_job):
-    
     client_secret = "W9hAa7i62Uv?hLTLH-?BlxhRCYWIkj?A"
     application_id = "bdf4dd0c-9ba0-4bc2-b72f-d7ce5023f0b9"
     credentials = (application_id, client_secret)
@@ -74,6 +73,30 @@ def archive_nd_delete_team(gearman_worker, gearman_job):
     print("The team was deleted!")
     group.delete()
     return "Requested team was deleted successfully!"
+
+def update_team(gearman_worker, gearman_job):
+    
+    client_secret = "W9hAa7i62Uv?hLTLH-?BlxhRCYWIkj?A"
+    application_id = "bdf4dd0c-9ba0-4bc2-b72f-d7ce5023f0b9"
+    credentials = (application_id, client_secret)
+    tenant_id = "17855ce0-d47e-48df-9c90-33b4fa21c861"
+    account = Account(credentials, auth_flow_type="credentials", tenant_id=tenant_id)
+
+    data = simplejson.loads(gearman_job.data)
+    
+    team_id = str(data[0])
+    new_name = str(data[1])
+
+    print(team_id, new_name)
+
+    group = Group(group_id=team_id, parent=account, protocol=MSGraphProtocol())
+    group.update(display_name=new_name, mail_enabled=True, security_enabled=True)
+    
+    print("Group id: " + group.team_id)
+    return group.team_id
+    #return "Team was renamed!"
+
+
 
 
 def analytics():
@@ -111,5 +134,6 @@ gm_worker = python3_gearman.GearmanWorker(['localhost:4730'])
 while(True):
     print("Waiting for client requests...")
     gm_worker.register_task('create_team', create_team)
+    gm_worker.register_task('update_team', update_team)
     gm_worker.register_task('archive_nd_delete_team', archive_nd_delete_team)
     gm_worker.work()

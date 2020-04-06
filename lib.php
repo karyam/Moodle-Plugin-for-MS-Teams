@@ -74,17 +74,16 @@ function teams_add_instance($teams, $mform=null) {
     // shell_exec("gearmand -d");
     // shell_exec($command);
     
-    file_put_contents('php://stderr', print_r($teams->description, TRUE));
+    //file_put_contents('php://stderr', print_r($teams->description, TRUE));
     $file_content = $mform->get_file_content('attachment');
     $file_name = $mform->get_new_filename('attachment');
-    $senddata = array($teams->name, "None", "51this_should_be_passed_from_moodle", $file_content);
+    $senddata = array($teams->name, "None", "mailNickname", $file_content);
     
     $client = new GearmanClient();
     $client->addServer('localhost', 4730);
     
     $_msteamid = $client->doNormal("create_team", json_encode($senddata));
 
-    
     $teams->timecreated = time();
     $teams->msteamid = $_msteamid;
     //file_put_contents('php://stderr', print_r($teams->msteamid, TRUE));
@@ -109,8 +108,28 @@ function teams_add_instance($teams, $mform=null) {
 function teams_update_instance($moduleinstance, $mform = null) {
     global $DB;
 
+    $client = new GearmanClient();
+    $client->addServer('localhost', 4730);
+
+    $new_name = $moduleinstance->name;
+    file_put_contents('php://stderr', print_r($new_name, TRUE));
+
+    
+    // check if the team exists in the database
+    $exists = $DB->get_record('teams', array('id' => $moduleinstance->instance));
+    if (!$exists) {
+        file_put_contents('php://stderr', print_r("does_not_exists", TRUE));
+        return false;
+    }
+    
+    $senddata = array($exists->msteamid, $new_name);
+    $_msteamid = $client->doNormal("update_team", json_encode($senddata));
+    
     $moduleinstance->timemodified = time();
     $moduleinstance->id = $moduleinstance->instance;
+    $moduleinstance->msteamid = $_msteamid;
+    file_put_contents('php://stderr', print_r($_msteamid, TRUE));
+
     return $DB->update_record('teams', $moduleinstance);
 }
 
@@ -129,7 +148,7 @@ function teams_delete_instance($id) {
         file_put_contents('php://stderr', print_r("does_not_exists", TRUE));
         return false;
     }
-    file_put_contents('php://stderr', print_r($exists, TRUE));
+    //file_put_contents('php://stderr', print_r($exists, TRUE));
     
     $client = new GearmanClient();
     $client->addServer('localhost', 4730);
