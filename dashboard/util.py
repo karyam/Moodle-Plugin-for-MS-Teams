@@ -15,6 +15,8 @@ import igraph as ig
 import json
 import random
 from data_wrapper import DataWrapper
+import matplotlib.colors as mcolors
+
 #from textblob import *
 import plotly.express as px
 
@@ -98,13 +100,26 @@ def plotly_wordcloud(msgs:'list'=[]):
     freq_list_top = freq_list[:25]
     freq_list_top.reverse()
 
+    frequency_figure_data = {
+        "data": [
+            {
+                "y": word_list_top,
+                "x": freq_list_top,
+                "type": "bar",
+                "name": "",
+                "orientation": "h",
+            }
+        ],
+        "layout": {"height": "550", "margin": dict(t=20, b=20, l=100, r=20, pad=4)},
+    }
+
 
     treemap_trace = go.Treemap(
         labels=word_list_top, parents=[""] * len(word_list_top), values=freq_list_top
     )
     treemap_layout = go.Layout({"margin": dict(t=10, b=10, l=5, r=5, pad=4)})
     treemap_figure = {"data": [treemap_trace], "layout": treemap_layout}
-    return wordcloud_figure_data, treemap_figure
+    return wordcloud_figure_data, frequency_figure_data, treemap_figure
 
 
 def build_connectivity_graph():
@@ -114,18 +129,18 @@ def build_connectivity_graph():
     # f = opener.open(req)
     # data = json.loads(f.read())
     
-    N=50
+    N=99
     L=80
 
-    Edges=[(random.randrange(0,50), random.randrange(0,50)) for k in range(L)]
+    names = dw.get_usernames()    
 
+    Edges=[(random.randrange(0,99), random.randrange(0,99)) for k in range(L)]
     G=ig.Graph(Edges, directed=False)
     labels=[]
-    # group=[]
     
     for node in range(N):
-        labels.append(node)
-        #group.append(node['group'])
+        labels.append(names[node])
+    
     
     layt=G.layout('kk', dim=3)
     
@@ -220,3 +235,38 @@ def build_least_active_plot():
     df_least_active = dw.get_least_active_df()
     fig = px.bar(df_least_active, x='Name', y='Message Count')
     return fig
+
+
+def populate_lda_scatter(tsne_df, df_top3words, df_dominant_topic):
+    
+    mycolors = np.array([color for name, color in mcolors.TABLEAU_COLORS.items()])
+
+    # for each topic we create a separate trace
+    traces = []
+    for topic_id in df_top3words["topic_id"]:
+        tsne_df_f = tsne_df[tsne_df.topic_num == topic_id]
+        cluster_name = ", ".join(
+            df_top3words[df_top3words["topic_id"] == topic_id]["words"].to_list()
+        )
+        trace = go.Scatter(
+            name=cluster_name,
+            x=tsne_df_f["tsne_x"],
+            y=tsne_df_f["tsne_y"],
+            mode="markers",
+            hovertext=tsne_df_f["doc_num"],
+            marker=dict(
+                size=6,
+                color=mycolors[tsne_df_f["topic_num"]],  # set color equal to a variable
+                colorscale="Viridis",
+                showscale=False,
+            ),
+        )
+        traces.append(trace)
+
+    layout = go.Layout({"title": "Topic analysis using LDA"})
+
+    return {"data": traces, "layout": layout}
+
+
+# if __name__ == "__main__":
+#     build_connectivity_graph()

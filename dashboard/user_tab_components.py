@@ -81,6 +81,13 @@ WORDCLOUD_PLOTS_USER = [
             dbc.Row(
                 [
                     dbc.Col(
+                        dcc.Loading(
+                            id="loading-user-frequencies",
+                            children=[dcc.Graph(id="user-frequency-figure")],
+                            type="default",
+                        )
+                    ),
+                    dbc.Col(
                         [
                             dcc.Tabs(
                                 id="tabs",
@@ -195,6 +202,76 @@ USER_LDA_PLOT = dcc.Loading(
     id="loading-user-lda-plot", children=[dcc.Graph(id="user-tsne-lda")], type="default"
 )
 
+USER_LDA_TABLE = html.Div(
+    id="user-lda-table-block",
+    children=[
+        dcc.Loading(
+            id="user-loading-lda-table",
+            children=[
+                dash_table.DataTable(
+                    id="user-lda-table",
+                    style_cell_conditional=[
+                        {
+                            "if": {"column_id": "Text"},
+                            "textAlign": "left",
+                            "whiteSpace": "normal",
+                            "height": "auto",
+                            "min-width": "50%",
+                        }
+                    ],
+                    style_data_conditional=[
+                        {
+                            "if": {"row_index": "odd"},
+                            "backgroundColor": "rgb(243, 246, 251)",
+                        }
+                    ],
+                    style_cell={
+                        "padding": "16px",
+                        "whiteSpace": "normal",
+                        "height": "auto",
+                        "max-width": "0",
+                    },
+                    style_header={"backgroundColor": "white", "fontWeight": "bold"},
+                    style_data={"whiteSpace": "normal", "height": "auto"},
+                    filter_action="native",
+                    page_action="native",
+                    page_current=0,
+                    page_size=5,
+                    columns=[],
+                    data=[],
+                )
+            ],
+            type="default",
+        )
+    ],
+    style={"display": "none"},
+)
+
+USER_LDA_PLOTS = [
+    dbc.CardHeader(html.H5("Topic modelling using LDA")),
+    dbc.Alert(
+        "Not enough data to render LDA plots, please adjust the filters",
+        id="no-data-alert-lda",
+        color="warning",
+        style={"display": "none"},
+    ),
+    dbc.CardBody(
+        [
+            html.P(
+                "Click on a complaint point in the scatter to explore that specific complaint",
+                className="mb-0",
+            ),
+            html.P(
+                "(not affected by sample size or time frame selection)",
+                style={"fontSize": 10, "font-weight": "lighter"},
+            ),
+            USER_LDA_PLOT,
+            html.Hr(),
+            USER_LDA_TABLE,
+        ]
+    ),
+]
+
 USER_TAB_BODY = dbc.Container(
     [
         dbc.Row(
@@ -207,7 +284,7 @@ USER_TAB_BODY = dbc.Container(
         dbc.Card(WORDCLOUD_PLOTS_USER),
         dbc.Row([dbc.Col([dbc.Card(USER_CONNECTIVITY_GRAPH)])], style={"marginTop": 50}),
         dbc.Row([dbc.Col([dbc.Card(SENTIMENT_PLOTS_USER)])], style={"marginTop": 50}),
-        dbc.Row([dbc.Col([dbc.Card(USER_LDA_PLOTS)])], style={"marginTop": 50})
+        #dbc.Row([dbc.Col([dbc.Card(USER_LDA_PLOTS)])], style={"marginTop": 50}),
     ],
     className="mt-12",
 )

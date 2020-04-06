@@ -53,6 +53,13 @@ class DataWrapper():
     def get_mentions_head(self):
         return self.data['mentions.screennames'].head()
 
+    def get_usernames(self):
+        x = self.data.groupby('fromUser.username').count().reset_index()
+        return [str(i) for i in x['fromUser.username'].values]
+
+    def get_user_messages_df(self, username="QuincyLarson"):
+        msgs = self.data.loc[self.data['fromUser.username']==username,['text', 'parsed_sent']].reset_index()
+        return msgs
 
     def get_user_sent_msg_count(self, username='QuincyLarson', time_frame=None):
         """

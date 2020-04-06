@@ -83,6 +83,13 @@ WORDCLOUD_PLOTS_TEAM = [
             dbc.Row(
                 [
                     dbc.Col(
+                        dcc.Loading(
+                            id="loading-team-frequencies",
+                            children=[dcc.Graph(id="team-frequency-figure")],
+                            type="default",
+                        )
+                    ),
+                    dbc.Col(
                         [
                             dcc.Tabs(
                                 id="team-wordcloud-tabs",
